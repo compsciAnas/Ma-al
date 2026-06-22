@@ -677,7 +677,7 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
         alt.Chart(data)
         .mark_arc(
             innerRadius=0,
-            outerRadius=105,
+            outerRadius=95,
             stroke="#ffffff",
             strokeWidth=2
         )
@@ -688,14 +688,16 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
                 title=None,
                 scale=alt.Scale(range=pie_colors),
                 legend=alt.Legend(
-                    orient="bottom",
-                    columns=2,
-                    labelLimit=180,
-                    symbolSize=90,
-                    symbolType="circle",
-                    titlePadding=0,
-                    offset=12
-                )
+    orient="right",
+    direction="vertical",
+    columns=1,
+    labelLimit=300,
+    labelFontSize=13,
+    symbolSize=140,
+    symbolType="circle",
+    title=None,
+    offset=20
+)
             ),
             tooltip=[
                 alt.Tooltip("label:N", title=title),
@@ -703,7 +705,9 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
                 alt.Tooltip("pct:Q", title=t("النسبة %", "Share %")),
             ],
         )
-        .properties(height=390, title=title)
+        .properties(width=500,
+            height=320,
+            title=title)
         .configure_title(
             anchor="middle",
             fontSize=16,
