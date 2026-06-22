@@ -682,7 +682,7 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
         )
         .properties(height=300, title=title)
     )
-    st.altair_chart(chart, width="stretch")
+    st.altair_chart(chart, use_container_width=True)
 
 def page_dashboard(dfs: dict):
     st.markdown(
@@ -721,7 +721,7 @@ def page_dashboard(dfs: dict):
                 _donut_chart(df, "city", t("الشركات حسب المدينة", "Startups by City"))
 
             with st.expander(t("👁️ عرض أول 10 صفوف من البيانات", "👁️ Preview the dataset (first 10 rows)")):
-                st.dataframe(df.head(10), width="stretch")
+                st.dataframe(df.head(10), use_container_width=True)
 
 # ─── Page: About ──────────────────────────────────────────────────────────────
 def page_about():
