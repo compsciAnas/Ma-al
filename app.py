@@ -881,31 +881,24 @@ def page_chatbot():
         from google import genai
         from google.genai import types
     except ImportError:
-        st.error(t("مكتبة google-genai غير مثبّتة. ثبّتها بالأمر: pip install google-genai", "google-genai is not installed. Install it with: pip install google-genai"))
+        st.error(
+            t(
+                "مكتبة google-genai غير مثبّتة. ثبّتها بالأمر: pip install google-genai",
+                "google-genai is not installed. Install it with: pip install google-genai",
+            )
+        )
         return
 
-        import os
+    import os
 
     api_key = os.getenv("GEMINI_API_KEY")
 
     if not api_key:
-        st.error(t(
-            "لم يتم العثور على GEMINI_API_KEY. تأكد أنك أضفته في Hugging Face Secrets.",
-            "GEMINI_API_KEY was not found. Make sure you added it in Hugging Face Secrets."
-        ))
-        return
-
-    client = genai.Client(api_key=api_key)
-    if not api_key:
-        st.markdown(
-            f"""
-            <div class="info-box">
-                🔑 <b>{t("مطلوب مفتاح Gemini مجاني.", "A free Gemini API key is required.")}</b>
-                {t("أضفه في ملف .streamlit/secrets.toml ثم أعد تشغيل التطبيق.", "Add it to .streamlit/secrets.toml, then restart the app.")}
-                <br><code>GEMINI_API_KEY = "AIza..."</code>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.error(
+            t(
+                "لم يتم العثور على GEMINI_API_KEY. تأكد أنك أضفته في Hugging Face Secrets.",
+                "GEMINI_API_KEY was not found. Make sure you added it in Hugging Face Secrets.",
+            )
         )
         return
 
@@ -913,7 +906,8 @@ def page_chatbot():
 
     SYSTEM_PROMPT = (
         "أنت مساعد مآل. أجب بنفس لغة المستخدم. المنصة تقيّم الشركات الناشئة بدرجات تقديرية وليست نصيحة مالية أو استثمارية."
-        if is_ar() else
+        if is_ar()
+        else
         "You are Ma'al Assistant. Answer in the user's language. The platform evaluates startups using estimated scores and does not provide financial or investment advice."
     )
 
@@ -952,7 +946,11 @@ def page_chatbot():
     with st.expander(t("⚙️ إعدادات المحادثة", "⚙️ Chat Settings"), expanded=False):
         col_a, col_b = st.columns([2, 1])
         with col_a:
-            model_choice = st.selectbox(t("النموذج", "Model"), ["gemini-2.5-flash", "gemini-2.5-flash-lite"], index=0)
+            model_choice = st.selectbox(
+                t("النموذج", "Model"),
+                ["gemini-2.5-flash", "gemini-2.5-flash-lite"],
+                index=0,
+            )
         with col_b:
             st.write("")
             st.write("")
@@ -966,34 +964,46 @@ def page_chatbot():
 
     if prompt := st.chat_input(t("اكتب سؤالك هنا…", "Type your question here…")):
         st.session_state.chat_messages.append({"role": "user", "content": prompt})
+
         with st.chat_message("user"):
             st.markdown(prompt)
 
         contents = [
-            {"role": "model" if m["role"] == "assistant" else "user", "parts": [{"text": m["content"]}]}
+            {
+                "role": "model" if m["role"] == "assistant" else "user",
+                "parts": [{"text": m["content"]}],
+            }
             for m in st.session_state.chat_messages
         ]
 
         with st.chat_message("assistant"):
             placeholder = st.empty()
             full_reply = ""
+
             try:
                 stream = client.models.generate_content_stream(
                     model=model_choice,
                     contents=contents,
-                    config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT, max_output_tokens=1024),
+                    config=types.GenerateContentConfig(
+                        system_instruction=SYSTEM_PROMPT,
+                        max_output_tokens=1024,
+                    ),
                 )
+
                 for chunk in stream:
                     if chunk.text:
                         full_reply += chunk.text
                         placeholder.markdown(full_reply + "▌")
+
                 placeholder.markdown(full_reply)
+
             except Exception as e:
                 full_reply = f"{t('⚠️ صار خطأ أثناء الاتصال بالـ API:', '⚠️ API connection error:')} {e}"
                 placeholder.error(full_reply)
 
-        st.session_state.chat_messages.append({"role": "assistant", "content": full_reply})
-
+        st.session_state.chat_messages.append(
+            {"role": "assistant", "content": full_reply}
+        )
 # ─── Sidebar navigation ───────────────────────────────────────────────────────
 def sidebar_nav() -> str:
     if "lang" not in st.session_state:
