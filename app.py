@@ -665,6 +665,18 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
         counts = pd.concat([top, other])
     data = counts.reset_index()
     data.columns = ["label", "count"]
+
+    if label_col == "sector":
+        data["display_label"] = data["label"].apply(lambda x: choice_label(x, SECTOR_AR))
+    elif label_col == "city":
+        data["display_label"] = data["label"].apply(lambda x: choice_label(x, CITY_AR))
+    elif label_col == "funding_stage":
+        data["display_label"] = data["label"].apply(lambda x: choice_label(x, FUNDING_STAGE_AR))
+    else:
+        data["display_label"] = data["label"]
+
+    data["display_label"] = data["display_label"].replace({"Other": t("أخرى", "Other"), "أخرى": t("أخرى", "Other")})
+
     total = data["count"].sum()
     data["pct"] = (data["count"] / total * 100).round(1)
 
@@ -684,7 +696,7 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
         .encode(
             theta=alt.Theta("count:Q", stack=True),
             color=alt.Color(
-                "label:N",
+                "display_label:N",
                 title=None,
                 scale=alt.Scale(range=pie_colors),
                 legend=alt.Legend(
@@ -700,7 +712,7 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
 )
             ),
             tooltip=[
-                alt.Tooltip("label:N", title=title),
+                alt.Tooltip("display_label:N", title=title),
                 alt.Tooltip("count:Q", title=t("العدد", "Count")),
                 alt.Tooltip("pct:Q", title=t("النسبة %", "Share %")),
             ],
