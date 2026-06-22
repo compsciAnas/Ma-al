@@ -668,21 +668,58 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
     total = data["count"].sum()
     data["pct"] = (data["count"] / total * 100).round(1)
 
+    pie_colors = [
+        "#2563eb", "#dc2626", "#16a34a", "#f59e0b", "#7c3aed",
+        "#0891b2", "#db2777", "#65a30d", "#ea580c", "#475569"
+    ]
+
     chart = (
         alt.Chart(data)
-        .mark_arc(innerRadius=70, stroke="#ffffff", strokeWidth=2)
+        .mark_arc(
+            innerRadius=0,
+            outerRadius=105,
+            stroke="#ffffff",
+            strokeWidth=2
+        )
         .encode(
             theta=alt.Theta("count:Q", stack=True),
-            color=alt.Color("label:N", title=None, scale=alt.Scale(scheme="tealblues"), legend=alt.Legend(orient="bottom", columns=2, labelLimit=160)),
+            color=alt.Color(
+                "label:N",
+                title=None,
+                scale=alt.Scale(range=pie_colors),
+                legend=alt.Legend(
+                    orient="bottom",
+                    columns=2,
+                    labelLimit=180,
+                    symbolSize=90,
+                    symbolType="circle",
+                    titlePadding=0,
+                    offset=12
+                )
+            ),
             tooltip=[
                 alt.Tooltip("label:N", title=title),
                 alt.Tooltip("count:Q", title=t("العدد", "Count")),
                 alt.Tooltip("pct:Q", title=t("النسبة %", "Share %")),
             ],
         )
-        .properties(height=300, title=title)
+        .properties(height=390, title=title)
+        .configure_title(
+            anchor="middle",
+            fontSize=16,
+            fontWeight="bold",
+            offset=18
+        )
+        .configure_view(strokeWidth=0)
+        .configure_legend(
+            labelFontSize=13,
+            labelColor="#64748b",
+            padding=12
+        )
     )
+
     st.altair_chart(chart, use_container_width=True)
+    st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
 
 def page_dashboard(dfs: dict):
     st.markdown(
