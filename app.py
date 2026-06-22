@@ -884,7 +884,9 @@ def page_chatbot():
         st.error(t("مكتبة google-genai غير مثبّتة. ثبّتها بالأمر: pip install google-genai", "google-genai is not installed. Install it with: pip install google-genai"))
         return
 
-    api_key = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY", ""))
+    import os
+
+api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         st.markdown(
             f"""
