@@ -839,20 +839,38 @@ def page_about():
 
     st.markdown("<hr class='maal-divider'>", unsafe_allow_html=True)
     st.markdown(t("### الفريق", "### Team"))
-    team = [
-        ("محمد", "AI Developer", "Model training & evaluation"),
-        ("عبدالعزيز", "Data Analyst", "Data & feature engineering"),
-        ("ماجد", "AI App Developer", "Assistant & service layer"),
-        ("أنس", "Frontend / Product", "Streamlit app & UI/UX"),
+
+    team_qrs = [
+        ("محمد البسام", "Mohammed.png"),
+        ("عبدالعزيز", "abdulaziz.png"),
+        ("ماجد", "majed.png"),
+        ("أنس", "anas.png"),
     ]
-    for col, (name, role, desc) in zip(st.columns(4), team):
+
+    for col, (name, qr_file) in zip(st.columns(4), team_qrs):
         with col:
+            qr_path = os.path.join(MODEL_DIR, qr_file)
+
             st.markdown(
                 f"""
-                <div class="maal-card" style="text-align:center;">
-                    <div style="font-size:1.4rem; font-weight:700; color:#0a3d62;">{name}</div>
-                    <div style="font-size:0.78rem; font-weight:600; color:#0a7ea4; margin:0.3rem 0;">{role}</div>
-                    <div style="font-size:0.76rem; color:#64748b;">{desc}</div>
+                <div class="maal-card" style="text-align:center; padding:1.4rem 1rem;">
+                    <div style="font-size:1.25rem; font-weight:700; color:#0a3d62; margin-bottom:0.9rem;">
+                        {name}
+                    </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            if os.path.exists(qr_path):
+                st.image(qr_path, width=165)
+            else:
+                st.warning(f"Missing QR image: {qr_file}")
+
+            st.markdown(
+                f"""
+                    <div style="font-size:0.78rem; color:#64748b; margin-top:0.8rem;">
+                        {t("امسح للوصول إلى LinkedIn", "Scan to visit LinkedIn")}
+                    </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
