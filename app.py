@@ -773,8 +773,7 @@ def page_dashboard(dfs: dict):
             if "city" in df.columns:
                 _donut_chart(df, "city", t("الشركات حسب المدينة", "Startups by City"))
 
-            with st.expander(t("👁️ عرض أول 10 صفوف من البيانات", "👁️ Preview the dataset (first 10 rows)")):
-                st.dataframe(df.head(10), use_container_width=True)
+            
 
 # ─── Page: About ──────────────────────────────────────────────────────────────
 def page_about():
