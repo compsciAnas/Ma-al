@@ -1,4 +1,3 @@
-
 # ============================================================
 # Ma'al | مآل  —  Startup Evaluation Platform
 # Streamlit MVP  |  Member 2 Deliverable
@@ -7,6 +6,7 @@
 
 import os
 import warnings
+
 warnings.filterwarnings("ignore")
 
 import numpy as np
@@ -147,18 +147,23 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 # ─── Bilingual UI ─────────────────────────────────────────────────────────────
 def lang() -> str:
     return st.session_state.get("lang", "ar")
 
+
 def is_ar() -> bool:
     return lang() == "ar"
+
 
 def t(ar: str, en: str) -> str:
     return ar if is_ar() else en
 
+
 def choice_label(value: str, mapping: dict) -> str:
     return mapping.get(value, value) if is_ar() else value
+
 
 SECTOR_AR = {
     "Agritech": "التقنية الزراعية",
@@ -187,6 +192,7 @@ CITIES = list(CITY_AR.keys())
 FUNDING_STAGES = list(FUNDING_STAGE_AR.keys())
 MODEL_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
 # ─── Helpers: preprocessing mirrors the notebooks exactly ─────────────────────
 def _clean_df(df: pd.DataFrame, drop_cols: list) -> pd.DataFrame:
     df = df.drop_duplicates()
@@ -199,25 +205,28 @@ def _clean_df(df: pd.DataFrame, drop_cols: list) -> pd.DataFrame:
         df[col] = df[col].fillna(df[col].mode()[0])
     return df
 
+
 def _feature_engineer_founder(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["funding_per_round"] = (
-        df["total_funding_sar"] / df["num_funding_rounds"].replace(0, np.nan)
+            df["total_funding_sar"] / df["num_funding_rounds"].replace(0, np.nan)
     ).fillna(0)
     df["investment_per_founder"] = (
-        df["total_funding_sar"] / df["num_founders"].replace(0, np.nan)
+            df["total_funding_sar"] / df["num_founders"].replace(0, np.nan)
     ).fillna(0)
     df["regulatory_support"] = (
-        df["sama_sandbox"] + df["rega_sandbox"] + df["ntdp_participation"]
+            df["sama_sandbox"] + df["rega_sandbox"] + df["ntdp_participation"]
     )
     return df
+
 
 def _feature_engineer_investor(df: pd.DataFrame) -> pd.DataFrame:
     df = _feature_engineer_founder(df)
     df["revenue_funding_ratio"] = (
-        df["monthly_revenue_sar"] / df["total_funding_sar"].replace(0, np.nan)
+            df["monthly_revenue_sar"] / df["total_funding_sar"].replace(0, np.nan)
     ).fillna(0)
     return df
+
 
 # ─── Model loading / training ─────────────────────────────────────────────────
 @st.cache_resource(show_spinner=False)
@@ -264,6 +273,7 @@ def load_models():
 
     return results
 
+
 @st.cache_data(show_spinner=False)
 def load_datasets():
     dfs = {}
@@ -276,12 +286,14 @@ def load_datasets():
                 pass
     return dfs
 
+
 def predict_score(model, preprocessor, input_df: pd.DataFrame) -> float:
     if preprocessor is None:
         raise ValueError("Preprocessor is missing. Please add the matching *_preprocessor.joblib file.")
     X_proc = preprocessor.transform(input_df)
     score = float(model.predict(X_proc)[0])
     return float(np.clip(score, 0, 100))
+
 
 def score_label(score: float) -> tuple[str, str]:
     if score >= 65:
@@ -290,6 +302,7 @@ def score_label(score: float) -> tuple[str, str]:
         return "Medium", "pill-medium"
     else:
         return "Low", "pill-low"
+
 
 def recommendation_text(score: float, mode: str) -> str:
     if mode == "founder":
@@ -335,11 +348,12 @@ def recommendation_text(score: float, mode: str) -> str:
                 "This startup is not yet positioned for investment based on the provided metrics. Revenue, traction, and funding momentum need substantial improvement before an investment can be justified."
             )
 
+
 # ─── Page: Home ───────────────────────────────────────────────────────────────
 def page_home():
     hero_subtitle = t(
-        "منصة ذكية لتقييم الشركات الناشئة",
-        "AI-Powered Startup Evaluation Platform"
+        "منصة ذكية لتقييم الشركات الناشئة ودعم القرارات الاستثمارية",
+        "AI-Powered Startup Evaluation & Investment Decision Support Platform"
     )
     hero_desc = t(
         "مآل منصة ذكية تساعد مؤسسي الشركات التقنية السعودية على فهم فرص بقاء شركاتهم، وتساعد المستثمرين على تقييم جاذبية الفرص الاستثمارية باستخدام نماذج تعلّم آلي تعطي درجة واضحة من 100 مع توصيات عملية.",
@@ -358,9 +372,17 @@ def page_home():
 
     c1, c2, c3 = st.columns(3)
     cards = [
-        ("🚀", t("وضع المؤسس", "Founder Mode"), t("أدخل بيانات شركتك واحصل على درجة البقاء من 100 مع توصيات للتحسين.", "Enter your startup details and get a Survival Score out of 100 with actionable recommendations."), "maal-card-green", "#065f46"),
-        ("💼", t("وضع المستثمر", "Investor Mode"), t("قيّم الشركة من ناحية الجاذبية الاستثمارية واحصل على درجة استثمارية من 100 مع قراءة للمخاطر.", "Evaluate startups on investment attractiveness and receive an Investment Score out of 100 with risk-adjusted insights."), "", "#0a3d62"),
-        ("📊", t("لوحة البيانات", "Dashboard"), t("استكشف بيانات التدريب: القطاعات، المدن، مراحل التمويل، وتوزيع الشركات.", "Explore the training dataset: sectors, cities, funding stages, and startup distributions."), "maal-card-amber", "#92400e"),
+        ("🚀", t("وضع المؤسس", "Founder Mode"), t("أدخل بيانات شركتك واحصل على درجة البقاء من 100 مع توصيات للتحسين.",
+                                                 "Enter your startup details and get a Survival Score out of 100 with actionable recommendations."),
+         "maal-card-green", "#065f46"),
+        ("💼", t("وضع المستثمر", "Investor Mode"),
+         t("قيّم الشركة من ناحية الجاذبية الاستثمارية واحصل على درجة استثمارية من 100 مع قراءة للمخاطر.",
+           "Evaluate startups on investment attractiveness and receive an Investment Score out of 100 with risk-adjusted insights."),
+         "", "#0a3d62"),
+        ("📊", t("لوحة البيانات", "Dashboard"),
+         t("استكشف بيانات التدريب: القطاعات، المدن، مراحل التمويل، وتوزيع الشركات.",
+           "Explore the training dataset: sectors, cities, funding stages, and startup distributions."),
+         "maal-card-amber", "#92400e"),
     ]
     for col, (icon, title, desc, cls, color) in zip([c1, c2, c3], cards):
         with col:
@@ -379,9 +401,12 @@ def page_home():
     st.markdown(t("### كيف تعمل المنصة", "### How it works"))
 
     steps = [
-        ("1", t("أدخل البيانات", "Enter Data"), t("عبّئ بيانات الشركة من النموذج.", "Fill in the startup details using the form.")),
-        ("2", t("تنبؤ بالذكاء الاصطناعي", "AI Prediction"), t("النموذج يتوقع النتيجة خلال ثوانٍ.", "The machine learning model predicts your score in seconds.")),
-        ("3", t("استفد من التوصيات", "Act on Insights"), t("اقرأ التصنيف، النتيجة، والتوصية المناسبة.", "Read your label, score, and personalised recommendation.")),
+        ("1", t("أدخل البيانات", "Enter Data"),
+         t("عبّئ بيانات الشركة من النموذج.", "Fill in the startup details using the form.")),
+        ("2", t("تنبؤ بالذكاء الاصطناعي", "AI Prediction"),
+         t("النموذج يتوقع النتيجة خلال ثوانٍ.", "The machine learning model predicts your score in seconds.")),
+        ("3", t("استفد من التوصيات", "Act on Insights"),
+         t("اقرأ التصنيف، النتيجة، والتوصية المناسبة.", "Read your label, score, and personalised recommendation.")),
     ]
     for col, (num, title, desc) in zip(st.columns(3), steps):
         with col:
@@ -407,6 +432,7 @@ def page_home():
         unsafe_allow_html=True,
     )
 
+
 # ─── Page: Founder Prediction ─────────────────────────────────────────────────
 def page_founder(models: dict):
     st.markdown(
@@ -426,9 +452,11 @@ def page_founder(models: dict):
         st.markdown(t("#### ملف الشركة", "#### Startup Profile"))
         c1, c2 = st.columns(2)
         with c1:
-            sector = st.selectbox(t("القطاع", "Sector"), SECTORS, index=0, format_func=lambda x: choice_label(x, SECTOR_AR))
+            sector = st.selectbox(t("القطاع", "Sector"), SECTORS, index=0,
+                                  format_func=lambda x: choice_label(x, SECTOR_AR))
             city = st.selectbox(t("المدينة", "City"), CITIES, index=0, format_func=lambda x: choice_label(x, CITY_AR))
-            funding_stage = st.selectbox(t("مرحلة التمويل", "Funding Stage"), FUNDING_STAGES, index=1, format_func=lambda x: choice_label(x, FUNDING_STAGE_AR))
+            funding_stage = st.selectbox(t("مرحلة التمويل", "Funding Stage"), FUNDING_STAGES, index=1,
+                                         format_func=lambda x: choice_label(x, FUNDING_STAGE_AR))
         with c2:
             startup_age = st.slider(t("عمر الشركة بالسنوات", "Startup Age (years)"), 2, 14, 3)
             num_founders = st.slider(t("عدد المؤسسين", "Number of Founders"), 1, 4, 2)
@@ -437,7 +465,8 @@ def page_founder(models: dict):
         st.markdown(t("#### تفاصيل التمويل", "#### Funding Details"))
         c3, c4 = st.columns(2)
         with c3:
-            total_funding = st.number_input(t("إجمالي التمويل بالريال", "Total Funding (SAR)"), min_value=100, max_value=500_000, value=10_000, step=1_000)
+            total_funding = st.number_input(t("إجمالي التمويل بالريال", "Total Funding (SAR)"), min_value=100,
+                                            max_value=500_000, value=10_000, step=1_000)
             num_rounds = st.slider(t("عدد الجولات التمويلية", "Number of Funding Rounds"), 1, 8, 2)
         with c4:
             speed_to_first = st.slider(t("المدة لأول جولة تمويلية بالشهور", "Speed to First Round (months)"), 1, 54, 12)
@@ -515,6 +544,7 @@ def page_founder(models: dict):
             except Exception as e:
                 st.error(f"{t('فشل التوقع:', 'Prediction failed:')} {e}")
 
+
 # ─── Page: Investor Prediction ────────────────────────────────────────────────
 def page_investor(models: dict):
     st.markdown(
@@ -534,9 +564,11 @@ def page_investor(models: dict):
         st.markdown(t("#### ملف الشركة", "#### Startup Profile"))
         c1, c2 = st.columns(2)
         with c1:
-            sector = st.selectbox(t("القطاع", "Sector"), SECTORS, index=0, format_func=lambda x: choice_label(x, SECTOR_AR))
+            sector = st.selectbox(t("القطاع", "Sector"), SECTORS, index=0,
+                                  format_func=lambda x: choice_label(x, SECTOR_AR))
             city = st.selectbox(t("المدينة", "City"), CITIES, index=0, format_func=lambda x: choice_label(x, CITY_AR))
-            funding_stage = st.selectbox(t("مرحلة التمويل", "Funding Stage"), FUNDING_STAGES, index=1, format_func=lambda x: choice_label(x, FUNDING_STAGE_AR))
+            funding_stage = st.selectbox(t("مرحلة التمويل", "Funding Stage"), FUNDING_STAGES, index=1,
+                                         format_func=lambda x: choice_label(x, FUNDING_STAGE_AR))
         with c2:
             startup_age = st.slider(t("عمر الشركة بالسنوات", "Startup Age (years)"), 2, 14, 3)
             num_founders = st.slider(t("عدد المؤسسين", "Number of Founders"), 1, 4, 2)
@@ -545,15 +577,18 @@ def page_investor(models: dict):
         st.markdown(t("#### السوق والانتشار", "#### Market & Traction"))
         c3, c4 = st.columns(2)
         with c3:
-            market_growth_index = st.slider(t("مؤشر نمو السوق من 0 إلى 1", "Market Growth Index (0–1)"), 0.48, 0.90, 0.78, step=0.01)
+            market_growth_index = st.slider(t("مؤشر نمو السوق من 0 إلى 1", "Market Growth Index (0–1)"), 0.48, 0.90,
+                                            0.78, step=0.01)
             traction_score = st.slider(t("درجة التفاعل / الانتشار من 100", "Traction Score (0–100)"), 2, 100, 50)
         with c4:
-            monthly_revenue = st.number_input(t("الإيراد الشهري بالريال", "Monthly Revenue (SAR)"), min_value=3, max_value=80_000_000, value=50_000, step=5_000)
+            monthly_revenue = st.number_input(t("الإيراد الشهري بالريال", "Monthly Revenue (SAR)"), min_value=3,
+                                              max_value=80_000_000, value=50_000, step=5_000)
 
         st.markdown(t("#### تفاصيل التمويل", "#### Funding Details"))
         c5, c6 = st.columns(2)
         with c5:
-            total_funding = st.number_input(t("إجمالي التمويل بالريال", "Total Funding (SAR)"), min_value=100, max_value=500_000, value=10_000, step=1_000)
+            total_funding = st.number_input(t("إجمالي التمويل بالريال", "Total Funding (SAR)"), min_value=100,
+                                            max_value=500_000, value=10_000, step=1_000)
             num_rounds = st.slider(t("عدد الجولات التمويلية", "Number of Funding Rounds"), 1, 8, 2)
         with c6:
             speed_to_first = st.slider(t("المدة لأول جولة تمويلية بالشهور", "Speed to First Round (months)"), 1, 54, 12)
@@ -638,6 +673,7 @@ def page_investor(models: dict):
             except Exception as e:
                 st.error(f"{t('فشل التوقع:', 'Prediction failed:')} {e}")
 
+
 # ─── Result display (shared) ──────────────────────────────────────────────────
 def _display_result(score: float, mode: str):
     label, pill_class = score_label(score)
@@ -688,6 +724,7 @@ def _display_result(score: float, mode: str):
         unsafe_allow_html=True,
     )
 
+
 # ─── Page: Dashboard ──────────────────────────────────────────────────────────
 def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
     counts = df[label_col].value_counts()
@@ -732,16 +769,16 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
                 title=None,
                 scale=alt.Scale(range=pie_colors),
                 legend=alt.Legend(
-    orient="right",
-    direction="vertical",
-    columns=1,
-    labelLimit=300,
-    labelFontSize=13,
-    symbolSize=140,
-    symbolType="circle",
-    title=None,
-    offset=20
-)
+                    orient="right",
+                    direction="vertical",
+                    columns=1,
+                    labelLimit=300,
+                    labelFontSize=13,
+                    symbolSize=140,
+                    symbolType="circle",
+                    title=None,
+                    offset=20
+                )
             ),
             tooltip=[
                 alt.Tooltip("display_label:N", title=title),
@@ -750,8 +787,8 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
             ],
         )
         .properties(width=500,
-            height=320,
-            title=title)
+                    height=320,
+                    title=title)
         .configure_title(
             anchor="middle",
             fontSize=16,
@@ -768,6 +805,7 @@ def _donut_chart(df: pd.DataFrame, label_col: str, title: str, top_n: int = 7):
 
     st.altair_chart(chart, use_container_width=True)
     st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
+
 
 def page_dashboard(dfs: dict):
     st.markdown(
@@ -865,7 +903,8 @@ def page_dashboard(dfs: dict):
             m1, m2 = st.columns(2)
             m1.metric(t("إجمالي الشركات", "Total Startups"), f"{len(df):,}")
             if target in df.columns:
-                m2.metric(t("متوسط النتيجة", f"Average {target.replace('_',' ').title()}"), f"{df[target].mean():.1f} / 100")
+                m2.metric(t("متوسط النتيجة", f"Average {target.replace('_', ' ').title()}"),
+                          f"{df[target].mean():.1f} / 100")
 
             st.markdown("<hr class='maal-divider'>", unsafe_allow_html=True)
             col_left, col_right = st.columns(2)
@@ -878,7 +917,6 @@ def page_dashboard(dfs: dict):
             if "city" in df.columns:
                 _donut_chart(df, "city", t("الشركات حسب المدينة", "Startups by City"))
 
-            
 
 # ─── Page: About ──────────────────────────────────────────────────────────────
 def page_about():
@@ -894,9 +932,9 @@ def page_about():
             <b style="font-size:1.05rem;">{t("ما هي مآل؟", "What is Ma'al?")}</b>
             <p style="margin-top:0.6rem; color:#374151; line-height:1.8;">
                 {t(
-                    "مآل منصة ذكية لتقييم الشركات الناشئة من زاويتين: زاوية المؤسس لفهم فرصة البقاء، وزاوية المستثمر لفهم الجاذبية الاستثمارية. يدخل المستخدم بيانات الشركة، ثم يعطي النموذج درجة واضحة من 100 مع توصية مبسطة.",
-                    "Ma'al is an AI platform that evaluates startups from two angles: founder survival potential and investor attractiveness. The user enters startup details, then the model returns a clear score out of 100 with a simple recommendation."
-                )}
+            "مآل منصة ذكية لتقييم الشركات الناشئة من زاويتين: زاوية المؤسس لفهم فرصة البقاء، وزاوية المستثمر لفهم الجاذبية الاستثمارية. يدخل المستخدم بيانات الشركة، ثم يعطي النموذج درجة واضحة من 100 مع توصية مبسطة.",
+            "Ma'al is an AI platform that evaluates startups from two angles: founder survival potential and investor attractiveness. The user enters startup details, then the model returns a clear score out of 100 with a simple recommendation."
+        )}
             </p>
         </div>
         """,
@@ -947,9 +985,9 @@ def page_about():
 
     team_qrs = [
         ("محمد البسام", "Mohammed.png"),
-        ("عبدالعزيز", "abdulaziz.png"),
-        ("ماجد", "majed.png"),
-        ("أنس", "anas.png"),
+        ("عبدالعزيز الشريف", "abdulaziz.png"),
+        ("ماجد العضيلة", "majed.png"),
+        ("أنس الزهراني", "anas.png"),
     ]
 
     for col, (name, qr_file) in zip(st.columns(4), team_qrs):
@@ -990,6 +1028,7 @@ def page_about():
         """,
         unsafe_allow_html=True,
     )
+
 
 # ─── Page: Assistant (AI Chatbot) ─────────────────────────────────────────────
 def page_chatbot():
@@ -1131,6 +1170,7 @@ def page_chatbot():
             {"role": "assistant", "content": full_reply}
         )
 
+
 # ─── Sidebar navigation ───────────────────────────────────────────────────────
 def sidebar_nav() -> str:
     if "lang" not in st.session_state:
@@ -1155,7 +1195,10 @@ def sidebar_nav() -> str:
         <div style="text-align:center; padding: 1.5rem 0 1rem;">
             <div style="font-size:2.2rem; font-weight:800; color:#ffffff; letter-spacing:-1px;">مآل</div>
             <div style="font-size:0.75rem; color:#94a3b8; letter-spacing:0.1em;">
-                {t("منصة ذكية لتقييم الشركات الناشئة", "AI STARTUP EVALUATOR")}
+               {t(
+    "منصة ذكية لتقييم الشركات الناشئة ودعم القرارات الاستثمارية",
+    "AI Startup Evaluation & Investment Decision Support"
+)}
             </div>
         </div>
         <hr style="border-color:#1e3a5f; margin-bottom:1rem;">
@@ -1190,6 +1233,7 @@ def sidebar_nav() -> str:
     )
     return selected_key
 
+
 # ─── Main ─────────────────────────────────────────────────────────────────────
 def main():
     page = sidebar_nav()
@@ -1216,6 +1260,7 @@ def main():
         page_chatbot()
     elif page == "about":
         page_about()
+
 
 if __name__ == "__main__":
     main()
