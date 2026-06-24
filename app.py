@@ -783,6 +783,79 @@ def page_dashboard(dfs: dict):
         ))
         return
 
+    # ─── Average Scores Bar Chart ─────────────────────────────────────────────
+    avg_scores = []
+
+    if "founder" in dfs and "survival_score" in dfs["founder"].columns:
+        avg_scores.append({
+            "Score Type": t("درجة البقاء", "Survival Score"),
+            "Average Score": dfs["founder"]["survival_score"].mean()
+        })
+
+    if "investor" in dfs and "investment_score" in dfs["investor"].columns:
+        avg_scores.append({
+            "Score Type": t("درجة الاستثمار", "Investment Score"),
+            "Average Score": dfs["investor"]["investment_score"].mean()
+        })
+
+    if avg_scores:
+        avg_df = pd.DataFrame(avg_scores)
+        avg_df["Score Label"] = avg_df["Average Score"].round(1).astype(str) + " / 100"
+
+        st.markdown(t("### 📈 متوسط درجات النماذج", "### 📈 Average Model Scores"))
+
+        avg_bars = (
+            alt.Chart(avg_df)
+            .mark_bar(
+                cornerRadiusTopLeft=8,
+                cornerRadiusTopRight=8
+            )
+            .encode(
+                x=alt.X(
+                    "Score Type:N",
+                    sort=None,
+                    title=None,
+                    axis=alt.Axis(labelFontSize=13, labelColor="#334155")
+                ),
+                y=alt.Y(
+                    "Average Score:Q",
+                    scale=alt.Scale(domain=[0, 100]),
+                    title=t("متوسط النتيجة", "Average Score"),
+                    axis=alt.Axis(labelFontSize=12, titleFontSize=13)
+                ),
+                tooltip=[
+                    alt.Tooltip("Score Type:N", title=t("نوع الدرجة", "Score Type")),
+                    alt.Tooltip("Average Score:Q", title=t("متوسط النتيجة", "Average Score"), format=".1f")
+                ]
+            )
+            .properties(height=340)
+        )
+
+        avg_text = (
+            alt.Chart(avg_df)
+            .mark_text(
+                align="center",
+                baseline="bottom",
+                dy=-6,
+                fontSize=14,
+                fontWeight="bold",
+                color="#0d1b2a"
+            )
+            .encode(
+                x=alt.X("Score Type:N", sort=None),
+                y=alt.Y("Average Score:Q"),
+                text="Score Label:N"
+            )
+        )
+
+        avg_chart = (
+            (avg_bars + avg_text)
+            .configure_view(strokeWidth=0)
+        )
+
+        st.altair_chart(avg_chart, use_container_width=True)
+        st.markdown("<hr class='maal-divider'>", unsafe_allow_html=True)
+
     tab_names = [t("المؤسس", "Founder") if k == "founder" else t("المستثمر", "Investor") for k in dfs.keys()]
     tabs = st.tabs(tab_names)
 
