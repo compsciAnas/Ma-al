@@ -577,9 +577,9 @@ def page_investor(models: dict):
         st.markdown(t("#### السوق والانتشار", "#### Market & Traction"))
         c3, c4 = st.columns(2)
         with c3:
-            market_growth_index = st.slider(t("مؤشر نمو السوق من 0 إلى 1", "Market Growth Index (0–1)"), 0.48, 0.90,
+            market_growth_index = st.slider(t("مؤشر نمو السوق من 0.48 إلى 0.90", "Market Growth Index (0.48–0.90)"), 0.48, 0.90,
                                             0.78, step=0.01)
-            traction_score = st.slider(t("درجة التفاعل / الانتشار من 100", "Traction Score (0–100)"), 2, 100, 50)
+            traction_score = st.slider(t("درجة التفاعل / الانتشار من 100", "Traction Score (2–100)"), 2, 100, 50)
         with c4:
             monthly_revenue = st.number_input(t("الإيراد الشهري بالريال", "Monthly Revenue (SAR)"), min_value=3,
                                               max_value=80_000_000, value=50_000, step=5_000)
