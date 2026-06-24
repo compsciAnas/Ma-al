@@ -457,6 +457,14 @@ def page_founder(models: dict):
         funding_per_round = total_funding / max(num_rounds, 1)
         investment_per_founder = total_funding / max(num_founders, 1)
         regulatory_support = int(sama_sandbox) + int(rega_sandbox) + int(ntdp_participation)
+        is_growth_stage = 1 if funding_stage in ["Growth", "Series A", "Series B", "Series C"] else 0
+        is_early_stage = 1 if funding_stage in ["Pre-Seed", "Seed"] else 0
+        founder_investor_ratio = num_founders / max(num_investors, 1)
+        fast_first_round_score = 1 / max(speed_to_first, 1)
+        investor_founder_team_size = num_investors * num_founders
+        investors_per_year = num_investors / max(startup_age, 1)
+        rounds_per_year = num_rounds / max(startup_age, 1)
+        investor_per_round = num_investors / max(num_rounds, 1)
 
         input_df = pd.DataFrame({
             "startup_age_years": [startup_age],
@@ -471,6 +479,14 @@ def page_founder(models: dict):
             "funding_per_round": [funding_per_round],
             "investment_per_founder": [investment_per_founder],
             "regulatory_support": [regulatory_support],
+            "is_growth_stage": [is_growth_stage],
+            "is_early_stage": [is_early_stage],
+            "founder_investor_ratio": [founder_investor_ratio],
+            "fast_first_round_score": [fast_first_round_score],
+            "investor_founder_team_size": [investor_founder_team_size],
+            "investors_per_year": [investors_per_year],
+            "rounds_per_year": [rounds_per_year],
+            "investor_per_round": [investor_per_round],
             "sector": [sector],
             "city": [city],
             "funding_stage": [funding_stage],
@@ -558,6 +574,14 @@ def page_investor(models: dict):
         investment_per_founder = total_funding / max(num_founders, 1)
         regulatory_support = int(sama_sandbox) + int(rega_sandbox) + int(ntdp_participation)
         revenue_funding_ratio = monthly_revenue / max(total_funding, 1)
+        is_growth_stage = 1 if funding_stage in ["Growth", "Series A", "Series B", "Series C"] else 0
+        is_early_stage = 1 if funding_stage in ["Pre-Seed", "Seed"] else 0
+        founder_investor_ratio = num_founders / max(num_investors, 1)
+        fast_first_round_score = 1 / max(speed_to_first, 1)
+        investor_founder_team_size = num_investors * num_founders
+        investors_per_year = num_investors / max(startup_age, 1)
+        rounds_per_year = num_rounds / max(startup_age, 1)
+        investor_per_round = num_investors / max(num_rounds, 1)
 
         input_df = pd.DataFrame({
             "startup_age_years": [startup_age],
@@ -576,6 +600,14 @@ def page_investor(models: dict):
             "investment_per_founder": [investment_per_founder],
             "regulatory_support": [regulatory_support],
             "revenue_funding_ratio": [revenue_funding_ratio],
+            "is_growth_stage": [is_growth_stage],
+            "is_early_stage": [is_early_stage],
+            "founder_investor_ratio": [founder_investor_ratio],
+            "fast_first_round_score": [fast_first_round_score],
+            "investor_founder_team_size": [investor_founder_team_size],
+            "investors_per_year": [investors_per_year],
+            "rounds_per_year": [rounds_per_year],
+            "investor_per_round": [investor_per_round],
             "sector": [sector],
             "city": [city],
             "funding_stage": [funding_stage],
