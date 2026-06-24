@@ -1000,44 +1000,49 @@ def page_chatbot():
     )
 
     try:
-        from google import genai
-        from google.genai import types
+        from groq import Groq
     except ImportError:
         st.error(
             t(
-                "مكتبة google-genai غير مثبّتة. ثبّتها بالأمر: pip install google-genai",
-                "google-genai is not installed. Install it with: pip install google-genai",
+                "مكتبة groq غير مثبّتة. أضف groq داخل ملف requirements.txt",
+                "groq is not installed. Add groq to requirements.txt",
             )
         )
         return
 
-    import os
-
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
 
     if not api_key:
         st.error(
             t(
-                "لم يتم العثور على GEMINI_API_KEY. تأكد أنك أضفته في Hugging Face Secrets.",
-                "GEMINI_API_KEY was not found. Make sure you added it in Hugging Face Secrets.",
+                "لم يتم العثور على GROQ_API_KEY. أضفه في Hugging Face Secrets.",
+                "GROQ_API_KEY was not found. Add it in Hugging Face Secrets.",
             )
         )
         return
 
-    client = genai.Client(api_key=api_key)
+    client = Groq(api_key=api_key)
 
     SYSTEM_PROMPT = (
-        "أنت مساعد مآل. أجب بنفس لغة المستخدم. المنصة تقيّم الشركات الناشئة بدرجات تقديرية وليست نصيحة مالية أو استثمارية."
+        "أنت مساعد مآل. أجب بنفس لغة المستخدم. "
+        "مآل منصة تعليمية لتقييم الشركات الناشئة باستخدام نماذج تعلم آلي. "
+        "اشرح النتائج بوضوح، وقدم توصيات عملية للمؤسس أو المستثمر. "
+        "لا تغيّر الدرجة التي حسبها النموذج ولا تدّعي أنها نصيحة مالية أو استثمارية."
         if is_ar()
         else
-        "You are Ma'al Assistant. Answer in the user's language. The platform evaluates startups using estimated scores and does not provide financial or investment advice."
+        "You are Ma'al Assistant. Answer in the user's language. "
+        "Ma'al is an educational startup evaluation platform powered by machine learning models. "
+        "Explain results clearly and provide practical recommendations for founders or investors. "
+        "Do not change the model score and do not present the output as financial or investment advice."
     )
 
     last = st.session_state.get("last_prediction")
     if last:
         inputs_text = "\n".join(f"- {k}: {v}" for k, v in last["inputs"].items())
         SYSTEM_PROMPT += (
-            f"\n\nLast evaluation context:\nMode: {last['mode']}\nInputs:\n{inputs_text}\n"
+            f"\n\nLast evaluation context:\n"
+            f"Mode: {last['mode']}\n"
+            f"Inputs:\n{inputs_text}\n"
             f"Model score: {last['score_name']} = {last['score']}/100.\n"
             "Do not recompute or change this score. Only explain it and give practical advice."
         )
@@ -1070,7 +1075,11 @@ def page_chatbot():
         with col_a:
             model_choice = st.selectbox(
                 t("النموذج", "Model"),
-                ["gemini-2.5-flash", "gemini-2.5-flash-lite"],
+                [
+                    "llama-3.3-70b-versatile",
+                    "llama-3.1-8b-instant",
+                    "gemma2-9b-it",
+                ],
                 index=0,
             )
         with col_b:
@@ -1090,31 +1099,26 @@ def page_chatbot():
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        contents = [
-            {
-                "role": "model" if m["role"] == "assistant" else "user",
-                "parts": [{"text": m["content"]}],
-            }
-            for m in st.session_state.chat_messages
-        ]
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        messages.extend(st.session_state.chat_messages)
 
         with st.chat_message("assistant"):
             placeholder = st.empty()
             full_reply = ""
 
             try:
-                stream = client.models.generate_content_stream(
+                stream = client.chat.completions.create(
                     model=model_choice,
-                    contents=contents,
-                    config=types.GenerateContentConfig(
-                        system_instruction=SYSTEM_PROMPT,
-                        max_output_tokens=1024,
-                    ),
+                    messages=messages,
+                    temperature=0.4,
+                    max_tokens=1024,
+                    stream=True,
                 )
 
                 for chunk in stream:
-                    if chunk.text:
-                        full_reply += chunk.text
+                    delta = chunk.choices[0].delta.content
+                    if delta:
+                        full_reply += delta
                         placeholder.markdown(full_reply + "▌")
 
                 placeholder.markdown(full_reply)
@@ -1126,6 +1130,7 @@ def page_chatbot():
         st.session_state.chat_messages.append(
             {"role": "assistant", "content": full_reply}
         )
+
 # ─── Sidebar navigation ───────────────────────────────────────────────────────
 def sidebar_nav() -> str:
     if "lang" not in st.session_state:
