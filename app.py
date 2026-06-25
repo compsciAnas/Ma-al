@@ -490,7 +490,7 @@ def page_founder(models: dict):
         is_early_stage = 1 if funding_stage in ["Pre-Seed", "Seed"] else 0
         founder_investor_ratio = num_founders / max(num_investors, 1)
         fast_first_round_score = 1 / max(speed_to_first, 1)
-        investor_founder_team_size = num_investors * num_founders
+        investor_founder_team_size = num_investors + num_founders
         investors_per_year = num_investors / max(startup_age, 1)
         rounds_per_year = num_rounds / max(startup_age, 1)
         investor_per_round = num_investors / max(num_rounds, 1)
