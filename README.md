@@ -103,8 +103,8 @@ groq                    # or google-genai / openai, depending on the chatbot pro
 
 ## 🌐 Live Deployments
 
-- Streamlit Community Cloud: *(add link)*
-- Hugging Face Spaces: *(add link)*
+- Streamlit Community Cloud
+- Hugging Face Spaces
 
 ## 📄 License / Academic Note
 
