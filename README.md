@@ -6,10 +6,6 @@
 
 ---
 
-## ⚠️ Before you use this README
-
-This document was rebuilt from our past working sessions, not from a fresh read of your current project folder, because a few technical details changed more than once between sessions. Please double-check these points against your actual code before treating this as final:
-
 | Item | What I used here | What changed across sessions |
 |---|---|---|
 | Final ML algorithm | **Random Forest Regressor** | You confirmed Random Forest as final in our most recent session, after earlier sessions flagged Linear Regression as the better-performing model in the notebooks. Worth having an answer ready if an evaluator asks about this discrepancy. |
